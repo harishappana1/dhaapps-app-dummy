@@ -1,0 +1,58 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      
+      - name: Run Tests
+        run: |
+          echo "Running tests..."
+          # Add your actual test commands here
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Build Application
+        run: |
+          echo "Building application..."
+          # Add your build commands here
+
+  deploy-qa:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to QA
+        run: echo "Deploying to QA environment..."
+
+  deploy-prod:
+    needs: deploy-qa
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: dhaappps
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: .
+
